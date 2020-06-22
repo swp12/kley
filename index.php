@@ -50,7 +50,7 @@ echo ' <div class="form-group">
       <input type="text" class="form-control" id="newdomain" placeholder="Enter new domain" name="newdomain" value="'.$newdomain.'"></div>  <input type="button" onclick="wpinstall()" class="btn btn-default" value="Install">
 	  <br/>
 	  <div id="loading" style="display:none;"><p class="text-center"><img src="https://i.extraimage.info/pix/KLtQ0.gif" border="0"></p></div>
-	 <div id="output"></div>
+	 <div id="output" style="word-wrap: break-word;"></div>
  ';
  
 while (@ ob_end_flush()); // end all output buffers if any
