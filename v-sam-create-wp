@@ -7,6 +7,15 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
+if(($4-eq2)); 
+then 
+    for i in $(/usr/local/vesta/bin/v-list-users | tail -n +3 | cut -f1 -d' ' |  xargs)
+        do 
+            /usr/local/vesta/bin/v-list-web-domains $i|  tail -n +3 | cut -f1 -d' ' |  xargs 
+        done
+        exit 1
+fi
+
 domain=$(echo $1 | tr '[:upper:]' '[:lower:]') 
 
 PATH=$PATH:/usr/local/vesta/bin
@@ -62,29 +71,29 @@ echo ""
 mysqldump -u $wpdbuser -p$wpdbpass $wpdbname  > /home/$user/web/$newdomain/public_shtml/dump.sql
 sed -i   "s/$domain/$newdomain/g" /home/$user/web/$newdomain/public_shtml/dump.sql
 uniq=$(cat /proc/sys/kernel/random/uuid | cut -c1-3)
-newdbname=datbas$uniq
-newdbuser=datbas$uniq
+newdbname="${user}_db_${uniq}"
+newdbuser="${user}_db_${uniq}"
 newpass=$(cat /proc/sys/kernel/random/uuid | cut -c1-16)
 
-v-add-database $user $newdbname $newdbuser $newpass
+/usr/local/vesta/bin/v-add-database $user "db_${uniq}" "db_${uniq}" $newpass
 
 echo "Created new database"
 echo ""
-echo "NEW DB_NAME: admin_$newdbname"
+echo "NEW DB_NAME: $newdbname"
 echo ""
-echo "NEW DB_USER: admin_$newdbuser"
+echo "NEW DB_USER: $newdbuser"
 echo ""
 echo "NEW DB_PASSWORD: $newpass"
 echo ""
 
-mysql -u admin_$newdbuser -p$newpass admin_$newdbname < /home/$user/web/$newdomain/public_shtml/dump.sql
+mysql -u $newdbuser -p$newpass $newdbname < /home/$user/web/$newdomain/public_shtml/dump.sql
 
 echo "Updated new database"
 echo ""
 
 sed -i   "s/$domain/$newdomain/g" /home/$user/web/$newdomain/public_shtml/wp-config.php
-sed -i   "s/$wpdbname/admin_$newdbname/g" /home/$user/web/$newdomain/public_shtml/wp-config.php
-sed -i   "s/$wpdbuser/admin_$newdbuser/g" /home/$user/web/$newdomain/public_shtml/wp-config.php
+sed -i   "s/$wpdbname/$newdbname/g" /home/$user/web/$newdomain/public_shtml/wp-config.php
+sed -i   "s/$wpdbuser/$newdbuser/g" /home/$user/web/$newdomain/public_shtml/wp-config.php
 sed -i   "s/$wpdbpass/$newpass/g" /home/$user/web/$newdomain/public_shtml/wp-config.php
 sed -i   "s/$domain/$newdomain/g" /home/$user/web/$newdomain/public_shtml/robots.txt
 
@@ -145,7 +154,8 @@ else
     echo "" 
     echo "Deleted temp config"
     echo "" 
-    nginx -t 2>&1 | grep "is ok" |  awk '{if ($0==0) { print "Nginx not reloaded!!!"} else  {systemctl reload nginx; print "Nginx reloaded!"}}'
+
+    nginx -t && systemctl reload nginx || printf "Error\n"
 fi 
 
 echo "" 

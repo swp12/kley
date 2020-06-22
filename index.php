@@ -3,7 +3,7 @@
 error_reporting(NULL);
 
 ob_start();
-$TAB = 'WP';
+
 
 // Main include
 include($_SERVER['DOCUMENT_ROOT']."/inc/main.php");
@@ -26,45 +26,47 @@ if (isset($_SESSION['user'])) {
   ';
 
 
-echo '<div class="container"><h2>WP Perekleyka</h2>';
-	exec (VESTA_CMD . "v-list-user ".$user." json", $outputi, $return_vari);
-	$datai = json_decode(implode('', $outputi), true);
-$dati = array_reverse($datao,true);
-$email=$dati["$user"]['CONTACT'];
-	print_r($email);
-	exec (VESTA_CMD."v-list-web-domains $user json", $output, $return_var);
-$data = json_decode(implode('', $output), true);
-$data = array_reverse($data,true);
-echo '<div  id="wpform">
-    <div class="form-group">
-      <label for="domain">Old Domain:</label>';
-echo '<select name="domain" id="olddomain" class="form-control">';
-foreach($data as $dm=>$key){
-echo '<option value="'.$dm.'">'.$dm.'</option>';
- 
-}
-echo'</select></div>';
-echo "\n";
-echo ' <div class="form-group">
-      <label for="newdomain">New Domain:</label>
-      <input type="text" class="form-control" id="newdomain" placeholder="Enter new domain" name="newdomain" value="'.$newdomain.'"></div>  
-      <input type="button" onclick="wpinstall()" class="btn btn-default" value="Full Perekleyka">
-      <input type="button" onclick="wpinstallwithout()" class="btn btn-default" value="Perekleyka without nginx redirect">
-	  <br/>
-	  <div id="loading" style="display:none;"><p class="text-center"><img src="https://i.extraimage.info/pix/KLtQ0.gif" border="0"></p></div>
-	 <div id="output" style="word-wrap: break-word;"></div>
- ';
- 
-while (@ ob_end_flush()); // end all output buffers if any
+    echo '<div class="container"><h2>WP Perekleyka</h2>';
 
-$proc = popen($cmd, 'r');
-echo '<pre>';
-while (!feof($proc))
-{
-    echo fread($proc, 4096);
-    @ flush();
-}
-echo '</pre>';
+    
+    exec( "/usr/bin/sudo /usr/local/vesta/bin/v-sam-create-wp 1 2 3 2 2>&1", $outputu, $return_varu);
+    
+    $data = explode(' ',implode(' ', $outputu));
+    //array_reverse($data);
+	echo '<div  id="wpform">
+            <div class="form-group">
+            <label for="domain">Old Domain:</label>';
+    echo '<select name="domain" id="olddomain" class="form-control">';
+    
+
+    foreach (array_reverse($data) as $dm) {
+        echo '<option value="'.$dm.'">'.$dm.'</option>';
+        
+    }
+    
+    echo '</select></div>';
+
+    echo "\n";
+    echo ' <div class="form-group">
+        <label for="newdomain">New Domain:</label>
+        <input type="text" class="form-control" id="newdomain" placeholder="Enter new domain" name="newdomain" value="'.$newdomain.'"></div>  
+        <input type="button" onclick="wpinstall()" class="btn btn-default" value="Full Perekleyka">
+        <input type="button" onclick="wpinstallwithout()" class="btn btn-default" value="Perekleyka without nginx redirect">
+        <br/>
+        <div id="loading" style="display:none;"><p class="text-center"><img src="https://i.extraimage.info/pix/KLtQ0.gif" border="0"></p></div>
+        <div id="output" style="word-wrap: break-word;"></div>
+    ';
+    
+    while (@ ob_end_flush()); // end all output buffers if any
+
+    $proc = popen($cmd, 'r');
+    echo '<pre>';
+    while (!feof($proc))
+    {
+        echo fread($proc, 4096);
+        @ flush();
+    }
+    echo '</pre>';
 
 ?>
 <script> 

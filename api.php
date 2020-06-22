@@ -23,13 +23,16 @@ if (isset($_SESSION['user'])) {
         if (!empty($ot['1'])) {
             echo '<div class="panel panel-info">
                         <div class="panel-heading">Install Detail</div>
-                  <div class="panel-body">';
+                        <div class="panel-body">';
             print_r($ot['1']);
-            echo '</div>
-  </div>';
+            echo      '</div>
+                  </div>';
             ob_flush();
             flush();
         }
+    } elseif (isset($_GET['users']) ) {
+         exec( "/usr/bin/sudo /usr/local/vesta/bin/v-sam-create-wp 1 2 3 2 2>&1", $outputu, $return_varu);
+         echo (implode(' ', $outputu));
     }
 } else {
     echo '<h2>your login expire... please re login</h2>';
