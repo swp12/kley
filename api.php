@@ -12,7 +12,11 @@ if (isset($_SESSION['user'])) {
             $email = $dati["$user"]['CONTACT'];
         }
         $domain = $_GET['domain'];
-        $command='/usr/bin/sudo /usr/local/vesta/bin/v-sam-create-wp "'.$domain.'" "'.$newdomain.'" "'.$user.'"   2>&1'; 
+        if (isset($_GET['without'])) {
+            $command='/usr/bin/sudo /usr/local/vesta/bin/v-sam-create-wp "'.$domain.'" "'.$newdomain.'" "'.$user.'" "1"   2>&1';
+        } else {
+            $command='/usr/bin/sudo /usr/local/vesta/bin/v-sam-create-wp "'.$domain.'" "'.$newdomain.'" "'.$user.'"   2>&1'; 
+        }
         exec ($command, $output, $return_vari);
         $ddata  = implode('<br/>', $output);
         $ot = explode('~~~~', $ddata);

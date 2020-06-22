@@ -7,12 +7,14 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-domain=$1
+domain=$(echo $1 | tr '[:upper:]' '[:lower:]') 
 
 PATH=$PATH:/usr/local/vesta/bin
 export PATH
 
 user=$(/usr/local/vesta/bin/v-search-domain-owner $domain)
+echo "~~~~================================================================="
+echo ""
 
 # email="info@$domain";
 if [ $# -gt 1 ]; then
@@ -26,7 +28,7 @@ echo ""
 	  user=$3
 else
 echo ""
-      echo "\$user is NOT empty"
+      echo "$user exist"
 	  echo ""
 fi
 if [ ! -d "/home/$user" ]; then
@@ -35,31 +37,6 @@ if [ ! -d "/home/$user" ]; then
 fi
 
 /usr/local/vesta/bin/v-add-domain $user $newdomain
-# if [ ! -d "/home/$user/web/$domain/public_html" ]; then
-# /usr/local/vesta/bin/v-add-domain $user $domain
-#     #echo "Domain doesn't exist";
-#     #exit 1;
-# 	user=$(/usr/local/vesta/bin/v-search-domain-owner $domain)
-# # 	if [ ! -d "/home/$user/web/$domain/public_html" ]; then
-# # 
-# #     echo "OLd domain doesn't exist";
-# #     exit 1;
-# # 	
-# # fi
-# fi
-#cd "/home/$user/web/$domain/public_html"
-#wget http://wordpress.org/latest.tar.gz
-#tar xfvz latest.tar.gz
-#echo ""
-#echo "done."
-#exit 1;
-# if [ ! -f "/home/$user/conf/web/ssl.$domain.pem" ]; then
-#     v-add-letsencrypt-domain "$user" "$domain" "" "yes"
-# 
-#     if [ -f "/usr/local/vesta/data/templates/web/nginx/force-https.stpl" ]; then
-#         v-change-web-domain-proxy-tpl  "$user" "$domain" "force-https" "jpeg,jpg,png,gif,bmp,ico,svg,tif,tiff,css,js,htm,html,ttf,otf,webp,woff,txt,csv,rtf,doc,docx,xls,xlsx,ppt,pptx,odf,odp,ods,odt,pdf,psd,ai,eot,eps,ps,zip,tar,tgz,gz,rar,bz2,7z,aac,m4a,mp3,mp4,ogg,wav,wma,3gp,avi,flv,m4v,mkv,mov,mpeg,mpg,wmv,exe,iso,dmg,swf" "no"
-#     fi
-# fi
 
 WORKINGDIR="/home/$user/web/$newdomain/public_shtml"
 # FILE=latest.tar.gz
@@ -67,7 +44,7 @@ WORKINGDIR="/home/$user/web/$newdomain/public_shtml"
 rm -rf $WORKINGDIR/*
 
 cp -r /home/$user/web/$domain/public_html/. /home/$user/web/$newdomain/public_shtml
-echo "~~~~================================================================="
+
 echo " Moved files to temp directory /home/$user/web/$newdomain/public_shtml" 
 
 wpdbname=$(cat /home/$user/web/$newdomain/public_shtml/wp-config.php | grep DB_NAME | cut -d \' -f 4)
@@ -130,40 +107,46 @@ rm -rf /home/$user/web/$newdomain/public_shtml/*
 echo "Deleted temp files from /home/$user/web/$newdomain/public_shtml"
 echo "" 
 
-CONFIGDIR="/home/$user/conf/web/"
-TEMPCONFIG=$CONFIGDIR"tempconf.txt"
-OLDCONFIG=$CONFIGDIR$domain".nginx.conf"
+if [ $4 ]             
+then
+    echo "Without reconfig nginx to redirection"
+    echo "" 
+else
+    CONFIGDIR="/home/$user/conf/web/"
+    TEMPCONFIG=$CONFIGDIR"tempconf.txt"
+    OLDCONFIG=$CONFIGDIR$domain".nginx.conf"
 
-sed -i "/location \/ {/{N;a \        if \(\$http_user_agent \~\* \"Googlebot\|Googlebot-Video\|APIs-Google\|AdsBot-Google-Mobile\|AdsBot-Google\|Googlebot-Image\|Googlebot-News\|AdsBot-Google-Mobile-Apps\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n        if \(\$http_user_agent \~\* \"YandexBot\|YandexDirect\|YandexImages\|YandexMetrika\|YandexMobileBot\|YandexMedia\|YandexNews\|YandexPagechecker\|YandexMarket\|YandexCalenda\|YandexDirectDyn\|YaDirectFetcher\|YandexAccessibilityBot\|YandexScreenshotBot\|YandexVideoParser\|YandexSearchShop\|YandexOntoDBAPI\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n
-}" $OLDCONFIG
+    sed -i "/location \/ {/{N;a \        if \(\$http_user_agent \~\* \"Googlebot\|Googlebot-Video\|APIs-Google\|AdsBot-Google-Mobile\|AdsBot-Google\|Googlebot-Image\|Googlebot-News\|AdsBot-Google-Mobile-Apps\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n        if \(\$http_user_agent \~\* \"YandexBot\|YandexDirect\|YandexImages\|YandexMetrika\|YandexMobileBot\|YandexMedia\|YandexNews\|YandexPagechecker\|YandexMarket\|YandexCalenda\|YandexDirectDyn\|YaDirectFetcher\|YandexAccessibilityBot\|YandexScreenshotBot\|YandexVideoParser\|YandexSearchShop\|YandexOntoDBAPI\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n
+    }" $OLDCONFIG
 
-proxy_l_number=$( grep -n "proxy_pass" $OLDCONFIG | cut -d : -f 1| sed -n '1p')
-proxy_line=$(head -n"${proxy_l_number}"  $OLDCONFIG|tail -1 )
-location_line_number=$( grep -n "location / {" $OLDCONFIG | cut -d : -f 1 )
+    proxy_l_number=$( grep -n "proxy_pass" $OLDCONFIG | cut -d : -f 1| sed -n '1p')
+    proxy_line=$(head -n"${proxy_l_number}"  $OLDCONFIG|tail -1 )
+    location_line_number=$( grep -n "location / {" $OLDCONFIG | cut -d : -f 1 )
 
-newproxy_l_number=$(($location_line_number-1))
+    newproxy_l_number=$(($location_line_number-1))
 
-# rm $TEMPCONFIG
-head -n$newproxy_l_number  $OLDCONFIG >> $TEMPCONFIG
-echo "    location = /robots.txt {" >> $TEMPCONFIG
-echo "        allow all;" >> $TEMPCONFIG
-echo "$proxy_line" >> $TEMPCONFIG
-echo "}" >> $TEMPCONFIG
-tail  -n +$newproxy_l_number $OLDCONFIG >> $TEMPCONFIG
+    # rm $TEMPCONFIG
+    head -n$newproxy_l_number  $OLDCONFIG >> $TEMPCONFIG
+    echo "    location = /robots.txt {" >> $TEMPCONFIG
+    echo "        allow all;" >> $TEMPCONFIG
+    echo "$proxy_line" >> $TEMPCONFIG
+    echo "}" >> $TEMPCONFIG
+    tail  -n +$newproxy_l_number $OLDCONFIG >> $TEMPCONFIG
 
-echo "Changed nginx config of old domain"
-echo "Please, check config" 
-echo "#################################################################"
-cat $TEMPCONFIG
-echo "#################################################################"
+    echo "Changed nginx config of old domain"
+    echo "Please, check config" 
+    echo "#################################################################"
+    cat $TEMPCONFIG
+    echo "#################################################################"
 
-cp $TEMPCONFIG $CONFIGDIR$domain".nginx.conf"
-rm $TEMPCONFIG
+    cp $TEMPCONFIG $CONFIGDIR$domain".nginx.conf"
+    rm $TEMPCONFIG
 
-echo "" 
-echo "Deleted temp config"
-echo "" 
-nginx -t 2>&1 | grep "is ok" |  awk '{if ($0==0) { print "Nginx not reloaded!!!"} else  {systemctl reload nginx; print "Nginx reloaded!"}}'
+    echo "" 
+    echo "Deleted temp config"
+    echo "" 
+    nginx -t 2>&1 | grep "is ok" |  awk '{if ($0==0) { print "Nginx not reloaded!!!"} else  {systemctl reload nginx; print "Nginx reloaded!"}}'
+fi 
 
 echo "" 
 echo "Everything is done, master!"

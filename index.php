@@ -47,7 +47,9 @@ echo'</select></div>';
 echo "\n";
 echo ' <div class="form-group">
       <label for="newdomain">New Domain:</label>
-      <input type="text" class="form-control" id="newdomain" placeholder="Enter new domain" name="newdomain" value="'.$newdomain.'"></div>  <input type="button" onclick="wpinstall()" class="btn btn-default" value="Install">
+      <input type="text" class="form-control" id="newdomain" placeholder="Enter new domain" name="newdomain" value="'.$newdomain.'"></div>  
+      <input type="button" onclick="wpinstall()" class="btn btn-default" value="Full Perekleyka">
+      <input type="button" onclick="wpinstallwithout()" class="btn btn-default" value="Perekleyka without nginx redirect">
 	  <br/>
 	  <div id="loading" style="display:none;"><p class="text-center"><img src="https://i.extraimage.info/pix/KLtQ0.gif" border="0"></p></div>
 	 <div id="output" style="word-wrap: break-word;"></div>
@@ -75,14 +77,34 @@ function wpinstall() {
     var x = document.getElementById("loading");
     x.style.display = "block";
 
-
     data=samgrab('api.php?domain='+domain+'&newdomain='+newdomain+'');
     document.getElementById("output").innerHTML=data;
     x.style.display = "none";
 }
-function samgrab(link){var result="";
-$.ajax({url:link,async:false,success:function(data){result=data;}});
-return result;}
+
+function wpinstallwithout() {
+   
+	var e = document.getElementById("olddomain");
+	var newdomain = document.getElementById("newdomain").value;
+    var domain = e.options[e.selectedIndex].value;
+
+    var x = document.getElementById("loading");
+    x.style.display = "block";
+
+    data=samgrab('api.php?domain='+domain+'&newdomain='+newdomain+'&without=1');
+    document.getElementById("output").innerHTML=data;
+    x.style.display = "none";
+}
+
+function samgrab(link){
+    var result="";
+    $.ajax({
+        url:link,
+        async:false,
+        success:function(data){result=data;}
+    });
+    return result;
+}
 
 </script>
 <?php }else{
