@@ -108,6 +108,8 @@ echo ""
 
 cp -r /home/$user/web/$newdomain/public_shtml/. /home/$user/web/$newdomain/public_html
 
+chown -R $user:$user /home/$user/web/$newdomain/public_html
+
 echo "Moved files to /home/$user/web/$newdomain/public_html"
 echo ""
 
