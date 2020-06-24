@@ -100,12 +100,12 @@ sed -i   "s/$domain/$newdomain/g" /home/$user/web/$newdomain/public_shtml/robots
 echo "Changed wp-config.php and robots.txt"
 echo ""
 
-find /home/$user/web/$newdomain/public_html/ -name 'yandex*html'  -delete
+find /home/$user/web/$newdomain/public_shtml/ -name 'yandex*html'  -delete
 rm /home/$user/web/$newdomain/public_shtml/dump.sql
 
 echo "Deleted yandex file and dump"
 echo ""
-
+rm -rf /home/$user/web/$newdomain/public_html/*
 cp -r /home/$user/web/$newdomain/public_shtml/. /home/$user/web/$newdomain/public_html
 
 chown -R $user:$user /home/$user/web/$newdomain/public_html
