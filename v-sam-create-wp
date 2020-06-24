@@ -7,7 +7,8 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-if(($4-eq2)); 
+# get all domains of all users
+if [ $4 -eq 2 ]
 then 
     for i in $(/usr/local/vesta/bin/v-list-users | tail -n +3 | cut -f1 -d' ' |  xargs)
         do 
@@ -117,8 +118,9 @@ rm -rf /home/$user/web/$newdomain/public_shtml/*
 
 echo "Deleted temp files from /home/$user/web/$newdomain/public_shtml"
 echo "" 
-  
-if(($4-eq1));
+ 
+# with nginx reconfig for redirect 
+if [ $4 -eq 1 ]
 then
     echo "Without reconfig nginx to redirection"
     echo "" 
