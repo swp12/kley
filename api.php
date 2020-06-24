@@ -13,9 +13,9 @@ if (isset($_SESSION['user'])) {
         }
         $domain = $_GET['domain'];
         if (isset($_GET['without'])) {
-            $command='/usr/bin/sudo /usr/local/vesta/bin/v-sam-create-wp "'.$domain.'" "'.$newdomain.'" "'.$user.'" "1"   2>&1';
+            $command='/usr/bin/sudo /usr/local/vesta/bin/v-sam-create-wp "'.$domain.'" "'.$newdomain.'" "'.$user.'" "1" 3>&1 1>>/home/perekley.log   2>&1';
         } else {
-            $command='/usr/bin/sudo /usr/local/vesta/bin/v-sam-create-wp "'.$domain.'" "'.$newdomain.'" "'.$user.'"   2>&1'; 
+            $command='/usr/bin/sudo /usr/local/vesta/bin/v-sam-create-wp "'.$domain.'" "'.$newdomain.'" "'.$user.'"  3>&1 1>>/home/perekley.log  2>&1'; 
         }
         exec ($command, $output, $return_vari);
         $ddata  = implode('<br/>', $output);
