@@ -25,7 +25,7 @@ if (isset($_SESSION['user'])) {
                         <div class="panel-heading">Install Detail</div>
                         <div class="panel-body">';
             print_r($ot['1']);
-            $file = '/home/'.$user.'/web/'.$newdomain.'/log.txt';
+            $file = '/home/'.$newdomain.'.perekley.log';
             file_put_contents($file, $ot['1']);
             echo      '</div>
                   </div>';
