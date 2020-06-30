@@ -127,8 +127,24 @@ then
 else
     CONFIGDIR="/home/$user/conf/web/"
     TEMPCONFIG=$CONFIGDIR"tempconf.txt"
-    OLDCONFIG=$CONFIGDIR$domain".nginx.conf"
-
+#     OLDCONFIG=$CONFIGDIR$domain".nginx.conf"
+    HTTPSCONF=$CONFIGDIR$domain".nginx.ssl.conf"
+    if [ -f "$HTTPSCONF" ]
+    then 
+        OLDCONFIG=$HTTPSCONF
+        NEWCONFIG="/home/$user/conf/web/$newdomain.nginx.ssl.conf"
+        cp $OLDCONFIG $NEWCONFIG
+        cp /home/$user/conf/web/ssl.$domain.key /home/$user/conf/web/ssl.$newdomain.key
+        cp /home/$user/conf/web/ssl.$domain.ca /home/$user/conf/web/ssl.$newdomain.ca
+        cp /home/$user/conf/web/ssl.$domain.pem /home/$user/conf/web/ssl.$newdomain.pem
+        sed -i   "s/$domain/$newdomain/g" $NEWCONFIG
+        
+        echo "Copied ssl settings"
+        echo ""
+        
+    else
+        OLDCONFIG=$CONFIGDIR$domain".nginx.conf"
+    fi
     sed -i "/location \/ {/{N;a \        if \(\$http_user_agent \~\* \"Googlebot\|Googlebot-Video\|APIs-Google\|AdsBot-Google-Mobile\|AdsBot-Google\|Googlebot-Image\|Googlebot-News\|AdsBot-Google-Mobile-Apps\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n        if \(\$http_user_agent \~\* \"YandexBot\|YandexDirect\|YandexImages\|YandexMetrika\|YandexMobileBot\|YandexMedia\|YandexNews\|YandexPagechecker\|YandexMarket\|YandexCalenda\|YandexDirectDyn\|YaDirectFetcher\|YandexAccessibilityBot\|YandexScreenshotBot\|YandexVideoParser\|YandexSearchShop\|YandexOntoDBAPI\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n
     }" $OLDCONFIG
 
@@ -147,12 +163,12 @@ else
     tail  -n +$newproxy_l_number $OLDCONFIG >> $TEMPCONFIG
 
     echo "Changed nginx config of old domain"
-    echo "Please, check config" 
+    echo "Please, check config $OLDCONFIG" 
     echo "#################################################################"
     cat $TEMPCONFIG
     echo "#################################################################"
 
-    cp $TEMPCONFIG $CONFIGDIR$domain".nginx.conf"
+    cp $TEMPCONFIG $OLDCONFIG
     rm $TEMPCONFIG
 
     echo "" 
