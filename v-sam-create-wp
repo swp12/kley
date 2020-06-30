@@ -119,18 +119,20 @@ rm -rf /home/$user/web/$newdomain/public_shtml/*
 echo "Deleted temp files from /home/$user/web/$newdomain/public_shtml"
 echo "" 
  
-# with nginx reconfig for redirect 
+
 if [ $4 -eq 1 ]
 then
     echo "Without reconfig nginx to redirection"
     echo "" 
 else
+# with nginx reconfig for redirect 
     CONFIGDIR="/home/$user/conf/web/"
     TEMPCONFIG=$CONFIGDIR"tempconf.txt"
 #     OLDCONFIG=$CONFIGDIR$domain".nginx.conf"
     HTTPSCONF=$CONFIGDIR$domain".nginx.ssl.conf"
     if [ -f "$HTTPSCONF" ]
     then 
+    # https
         OLDCONFIG=$HTTPSCONF
         NEWCONFIG="/home/$user/conf/web/$newdomain.nginx.ssl.conf"
         cp $OLDCONFIG $NEWCONFIG
@@ -142,11 +144,17 @@ else
         echo "Copied ssl settings"
         echo ""
         
-    else
-        OLDCONFIG=$CONFIGDIR$domain".nginx.conf"
-    fi
-    sed -i "/location \/ {/{N;a \        if \(\$http_user_agent \~\* \"Googlebot\|Googlebot-Video\|APIs-Google\|AdsBot-Google-Mobile\|AdsBot-Google\|Googlebot-Image\|Googlebot-News\|AdsBot-Google-Mobile-Apps\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n        if \(\$http_user_agent \~\* \"YandexBot\|YandexDirect\|YandexImages\|YandexMetrika\|YandexMobileBot\|YandexMedia\|YandexNews\|YandexPagechecker\|YandexMarket\|YandexCalenda\|YandexDirectDyn\|YaDirectFetcher\|YandexAccessibilityBot\|YandexScreenshotBot\|YandexVideoParser\|YandexSearchShop\|YandexOntoDBAPI\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n
+        sed -i "/location \/ {/{N;a \        if \(\$http_user_agent \~\* \"Googlebot\|Googlebot-Video\|APIs-Google\|AdsBot-Google-Mobile\|AdsBot-Google\|Googlebot-Image\|Googlebot-News\|AdsBot-Google-Mobile-Apps\"\) \{ \n           rewrite \^\/\(.*\)\$ https:\/\/$newdomain/\$1 permanent; \n        \} \n        if \(\$http_user_agent \~\* \"YandexBot\|YandexDirect\|YandexImages\|YandexMetrika\|YandexMobileBot\|YandexMedia\|YandexNews\|YandexPagechecker\|YandexMarket\|YandexCalenda\|YandexDirectDyn\|YaDirectFetcher\|YandexAccessibilityBot\|YandexScreenshotBot\|YandexVideoParser\|YandexSearchShop\|YandexOntoDBAPI\"\) \{ \n           rewrite \^\/\(.*\)\$ https:\/\/$newdomain/\$1 permanent; \n        \} \n
     }" $OLDCONFIG
+        
+    else
+    # http
+        OLDCONFIG=$CONFIGDIR$domain".nginx.conf"
+        
+        sed -i "/location \/ {/{N;a \        if \(\$http_user_agent \~\* \"Googlebot\|Googlebot-Video\|APIs-Google\|AdsBot-Google-Mobile\|AdsBot-Google\|Googlebot-Image\|Googlebot-News\|AdsBot-Google-Mobile-Apps\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n        if \(\$http_user_agent \~\* \"YandexBot\|YandexDirect\|YandexImages\|YandexMetrika\|YandexMobileBot\|YandexMedia\|YandexNews\|YandexPagechecker\|YandexMarket\|YandexCalenda\|YandexDirectDyn\|YaDirectFetcher\|YandexAccessibilityBot\|YandexScreenshotBot\|YandexVideoParser\|YandexSearchShop\|YandexOntoDBAPI\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n
+    }" $OLDCONFIG
+    fi
+
 
     proxy_l_number=$( grep -n "proxy_pass" $OLDCONFIG | cut -d : -f 1| sed -n '1p')
     proxy_line=$(head -n"${proxy_l_number}"  $OLDCONFIG|tail -1 )
@@ -154,7 +162,6 @@ else
 
     newproxy_l_number=$(($location_line_number-1))
 
-    # rm $TEMPCONFIG
     head -n$newproxy_l_number  $OLDCONFIG >> $TEMPCONFIG
     echo "    location = /robots.txt {" >> $TEMPCONFIG
     echo "        allow all;" >> $TEMPCONFIG
