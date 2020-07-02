@@ -47,6 +47,8 @@ if [ ! -d "/home/$user" ]; then
 fi
 
 /usr/local/vesta/bin/v-add-domain $user $newdomain
+# /usr/local/vesta/bin/v-change-web-domain-backend-tpl $user $newdomain hosting yes
+# /usr/local/vesta/bin/v-change-web-domain-backend-tpl $user $newdomain phpcgi yes
 
 WORKINGDIR="/home/$user/web/$newdomain/public_shtml"
 # FILE=latest.tar.gz
@@ -118,27 +120,29 @@ rm -rf /home/$user/web/$newdomain/public_shtml/*
 
 echo "Deleted temp files from /home/$user/web/$newdomain/public_shtml"
 echo "" 
- 
 
-if [ $4 -eq 1 ]
-then
-    echo "Without reconfig nginx to redirection"
-    echo "" 
-else
-# with nginx reconfig for redirect 
-    CONFIGDIR="/home/$user/conf/web/"
-    TEMPCONFIG=$CONFIGDIR"tempconf.txt"
+CONFIGDIR="/home/$user/conf/web/"    
 #     OLDCONFIG=$CONFIGDIR$domain".nginx.conf"
-    HTTPSCONF=$CONFIGDIR$domain".nginx.ssl.conf"
-    if [ -f "$HTTPSCONF" ]
+APSSLCONFIG="$CONFIGDIR$domain.apache2.ssl.conf"
+if [ -f "$APSSLCONFIG" ]
+then
+    cp $CONFIGDIR$domain.apache2.ssl.conf $CONFIGDIR$newdomain.apache2.ssl.conf
+    sed -i   "s/$domain/$newdomain/g" $CONFIGDIR$newdomain.apache2.ssl.conf
+fi
+
+redirect(){
+    OLDCONFIG=$1
+    TEMPCONFIG=$CONFIGDIR"tempconf.txt"
+    if ( echo $OLDCONFIG| grep  "ssl")
     then 
     # https
-        OLDCONFIG=$HTTPSCONF
-        NEWCONFIG="/home/$user/conf/web/$newdomain.nginx.ssl.conf"
+        #OLDCONFIG=$HTTPSCONF
+        NEWCONFIG="$CONFIGDIR$newdomain.nginx.ssl.conf"
         cp $OLDCONFIG $NEWCONFIG
-        cp /home/$user/conf/web/ssl.$domain.key /home/$user/conf/web/ssl.$newdomain.key
-        cp /home/$user/conf/web/ssl.$domain.ca /home/$user/conf/web/ssl.$newdomain.ca
-        cp /home/$user/conf/web/ssl.$domain.pem /home/$user/conf/web/ssl.$newdomain.pem
+        cp $CONFIGDIRssl.$domain.key $CONFIGDIRssl.$newdomain.key
+        cp $CONFIGDIRssl.$domain.crt $CONFIGDIRssl.$newdomain.crt
+        cp $CONFIGDIRssl.$domain.ca  $CONFIGDIRssl.$newdomain.ca
+        cp $CONFIGDIRssl.$domain.pem $CONFIGDIRssl.$newdomain.pem
         sed -i   "s/$domain/$newdomain/g" $NEWCONFIG
         
         echo "Copied ssl settings"
@@ -149,7 +153,7 @@ else
         
     else
     # http
-        OLDCONFIG=$CONFIGDIR$domain".nginx.conf"
+        #OLDCONFIG=$CONFIGDIR$domain".nginx.conf"
         
         sed -i "/location \/ {/{N;a \        if \(\$http_user_agent \~\* \"Googlebot\|Googlebot-Video\|APIs-Google\|AdsBot-Google-Mobile\|AdsBot-Google\|Googlebot-Image\|Googlebot-News\|AdsBot-Google-Mobile-Apps\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n        if \(\$http_user_agent \~\* \"YandexBot\|YandexDirect\|YandexImages\|YandexMetrika\|YandexMobileBot\|YandexMedia\|YandexNews\|YandexPagechecker\|YandexMarket\|YandexCalenda\|YandexDirectDyn\|YaDirectFetcher\|YandexAccessibilityBot\|YandexScreenshotBot\|YandexVideoParser\|YandexSearchShop\|YandexOntoDBAPI\"\) \{ \n           rewrite \^\/\(.*\)\$ http:\/\/$newdomain/\$1 permanent; \n        \} \n
     }" $OLDCONFIG
@@ -181,7 +185,21 @@ else
     echo "" 
     echo "Deleted temp config"
     echo "" 
-
+}
+ 
+if [ $4 -eq 1 ]
+then
+    echo "Without reconfig nginx to redirection"
+    echo "" 
+else
+# with nginx reconfig for redirect 
+    
+    redirect $CONFIGDIR$domain".nginx.conf"
+    HTTPSCONF=$CONFIGDIR$domain".nginx.ssl.conf"
+    if [ -f "$HTTPSCONF" ]
+    then 
+        redirect $HTTPSCONF
+    fi
     nginx -t && systemctl reload nginx || printf '<b>Error!!!</b>\n'
 fi 
 
