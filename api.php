@@ -32,8 +32,8 @@ if (isset($_SESSION['user'])) {
             ob_flush();
             flush();
         }
-    } elseif (isset($_GET['users']) ) {
-         exec( "/usr/bin/sudo /usr/local/vesta/bin/v-sam-create-wp 1 2 3 2 2>&1", $outputu, $return_varu);
+    } elseif ( isset($_GET['action']) && $_GET['action'] == "update") {
+         exec( "/usr/bin/sudo /usr/local/vesta/bin/v-sam-install 2>&1", $outputu, $return_varu);
          echo (implode(' ', $outputu));
     }
 } else {

@@ -17,6 +17,12 @@ then
         exit 1
 fi
 
+if [ $4 -eq 3 ]
+then 
+    curl   -H "Accept: application/vnd.github.v3+json"   https://api.github.com/repos/swp12/kley/stats/contributors | grep -Po '"total":.*,' |  head -n 1 | tr -cd '[[:digit:]]' |  xargs 
+    exit 1
+fi
+
 domain=$(echo $1 | tr '[:upper:]' '[:lower:]') 
 
 PATH=$PATH:/usr/local/vesta/bin
