@@ -33,6 +33,10 @@ if (isset($_SESSION['user'])) {
     
     $data = explode(' ',implode(' ', $outputu));
     //array_reverse($data);
+    $current_version = file_get_contents("version");
+    exec( "/usr/bin/sudo /usr/local/vesta/bin/v-sam-create-wp 1 2 3 3 2>&1", $outputv, $return_varv);
+    $update = ($current_version == $outputv[3])?  "" : '<input type="button" onclick="wpupdate()" class="btn btn-default" value="Update">';
+    echo "<p>Version: " . $current_version . " " . $update . "</p>"; 
 	echo '<div  id="wpform">
             <div class="form-group">
             <label for="domain">Old Domain:</label>';
@@ -94,6 +98,12 @@ function wpinstallwithout() {
     x.style.display = "block";
 
     data=samgrab('api.php?domain='+domain+'&newdomain='+newdomain+'&without=1');
+    document.getElementById("output").innerHTML=data;
+    x.style.display = "none";
+}
+
+function wpupdate() {
+    data=samgrab('api.php?action=update');
     document.getElementById("output").innerHTML=data;
     x.style.display = "none";
 }

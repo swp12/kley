@@ -1,0 +1,7 @@
+#!/bin/bash
+# Made by Pserg
+# Version: 1.1
+
+wget https://raw.githubusercontent.com/swp12/kley/master/v-sam-install -O /usr/local/vesta/bin/v-sam-install
+chmod 755 /usr/local/vesta/bin/v-sam-install 
+/usr/local/vesta/bin/v-sam-install
