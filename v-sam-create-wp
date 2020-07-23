@@ -167,10 +167,16 @@ redirect(){
     newproxy_l_number=$(($location_line_number-1))
 
     head -n$newproxy_l_number  $OLDCONFIG >> $TEMPCONFIG
-    echo "    location = /robots.txt {" >> $TEMPCONFIG
-    echo "        allow all;" >> $TEMPCONFIG
-    echo "$proxy_line" >> $TEMPCONFIG
-    echo "}" >> $TEMPCONFIG
+    if (grep "robots.txt" $OLDCONFIG)
+    then
+        echo ""
+        echo "robots.txt already exist in old config"
+    else
+        echo "    location = /robots.txt {" >> $TEMPCONFIG
+        echo "        allow all;" >> $TEMPCONFIG
+        echo "$proxy_line" >> $TEMPCONFIG
+        echo "}" >> $TEMPCONFIG
+    fi
     tail  -n +$newproxy_l_number $OLDCONFIG >> $TEMPCONFIG
 
     echo "Changed nginx config of old domain"
